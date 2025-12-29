@@ -3,9 +3,9 @@ DSA210 – Introduction to Data Science (Fall 2025–2026)
 
 ## 1. Motivation
 
-Air pollution has become one of the most significant environmental determinants of human health, contributing to millions of premature deaths globally each year. Among its components, fine particulate matter (PM2.5) has been shown to cause chronic diseases such as diabetes and hypertension.
+Air pollution has become one of the most significant environmental determinants of human health, contributing to millions of premature deaths globally each year. Among its components, fine particulate matter ($\text{PM}_{2.5}$) is particularly dangerous due to its ability to enter the bloodstream, potentially triggering chronic conditions like diabetes and hypertension.
 
-This project aims to explore, at the county level across the United States, whether long-term exposure to PM2.5 correlates with higher prevalence of diabetes and hypertension. Behavioral and lifestyle risk factors such as obesity, smoking, and physical inactivity will be included as control variables. The goal is to integrate environmental and public health data to reveal potential population-level associations and evaluate how much environmental exposure contributes beyond individual behaviors.
+This project aims to explore, at the county level across the United States, whether long-term exposure to PM2.5 correlates with a higher prevalence of diabetes and hypertension. Unlike simpler studies that use broad county averages, this research begins at the census tract level—a much finer geographic scale—to capture local variations in pollution and health and combines this finer data to generate more precise county-level estimates. Behavioral and lifestyle risk factors such as obesity, smoking, and physical inactivity will be included as control variables. The goal is to integrate environmental and public health data to reveal potential population-level associations and evaluate how much environmental exposure contributes beyond individual behaviors.
 
 ## 2. Datasets
 
@@ -16,54 +16,71 @@ This project aims to explore, at the county level across the United States, whet
 **URL:** https://www.kaggle.com/datasets/cdc/500-cities/data
 
 **Description:**
-The dataset provides county-level estimates of health outcomes, risk factors, and preventive measures across all U.S. counties. Each variable represents the age-adjusted prevalence (percentage) of a given condition.
-
-**Key Variables to Be Used:**
-
-- DIABETES_AdjPrev: Age-adjusted prevalence of diabetes
-- BPHIGH_AdjPrev: Age-adjusted prevalence of high blood pressure (hypertension)
-- OBESITY_AdjPrev: Prevalence of obesity
-- CSMOKING_AdjPrev: Prevalence of current smoking
-- LPA_AdjPrev: Prevalence of leisure-time physical inactivity
-- ACCESS2_AdjPrev: Percentage of adults without health insurance
-- CountyFIPS: County-level FIPS code used for merging
+The dataset provides census tract-level estimates of health outcomes, risk factors, and preventive measures across all U.S. counties. Each variable represents the age-adjusted prevalence (percentage) of a given condition.
 
 ### b. EPA Air Quality System (AQS): Annual PM2.5 Concentrations
 
-**Source:** United States Environmental Protection Agency (EPA) – AirData Portal
+**Source:** United States Environmental Protection Agency (EPA) 
 
-**URL:** https://aqs.epa.gov/aqsweb/airdata/download_files.html#Annual
+**URLs:** https://healthdata.gov/CDC/Daily-Census-Tract-Level-PM2-5-Concentrations-2011/wwnf-fvrd/about_data | https://healthdata.gov/CDC/Daily-Census-Tract-Level-PM2-5-Concentrations-2016/k9st-jhz8/about_data
 
 **Description:**
-Contains annual mean concentrations of PM2.5 for each U.S. county, along with corresponding state and county codes, measurement counts, and summary statistics.
+High-resolution daily PM2.5 estimates for every census tract in the United States. The 10-year data will be averaged across years to create a stable "chronic exposure" metric for each tract.
+
+### c. NCHS Urban-Rural Classification Scheme
+
+**Source:** National Center for Health Statistics (NCHS)
+
+**URL:** https://www.cdc.gov/nchs/data-analysis-tools/urban-rural.html
+
+**Description:**
+This dataset classifies U.S. counties into urbanization levels (e.g., large central metro, medium metro, small metro, micropolitan, noncore) based on population size and density. This variable will be used to control for urban-rural differences in pollution exposure and health outcomes.
+
 
 ## 3. Data Integration Plan
 
-Both datasets include geographic identifiers that allow them to be matched at the county level. The EPA dataset contains State Code and County Code, while the CDC PLACES dataset includes a unified CountyFIPS identifier.
+The integration process follows a "Tract-to-County" pipeline to ensure the final county values are weighted by where people actually live.
 
-**Integration Steps:**
+1. Tract-Level Processing: PM2.5 daily data is first averaged by year for each census tract. These annual averages are then combined to create a long-term (multi-year) mean for each tract.
 
-1. Create a 5-digit FIPS key in the EPA dataset by combining state and county codes.
+2. Initial Merge: The PLACES health data and PM2.5 data are merged using the 11-digit Census Tract FIPS code.
 
-2. Calculate the average PM2.5 exposure for each county (single-year or multi-year average).
+3. Population-Weighted Aggregation: To reduce the 50,000+ data points to a county-level dataset without losing accuracy, population weighting is used. Instead of a simple average, the county value for each variable is calculated as:
 
-3. Merge the EPA and CDC datasets on their common FIPS codes.
+$$
+	\text{County Value} = \frac{\sum\bigl(\text{Tract Value} \times \text{Tract Population}\bigr)}{\sum \text{Tract Population}}
+$$
 
-4. Retain relevant columns for analysis: air pollution levels (PM2.5), disease prevalence (diabetes, hypertension), and behavioral factors (obesity, smoking, inactivity).
+This ensures that a highly populated, polluted tract has a greater impact on the county score than a sparsely populated one.
+
+4. Urbanization Mapping: The 6-level NCHS codes are joined using the 5-digit County FIPS (the first 5 digits of the ctfips).
 
 The merged dataset will provide a comprehensive view of how environmental and lifestyle variables align with public health outcomes across U.S. counties.
+
+**Final Dataset Variables:**
+ctfips, avg_pm25, state_abbreviation, state_name, county_name, total_population, total_population_18_plus, diabetes, hypertension, smoking, obesity, no_lt_physical_activity, binge_drinking, lack_of_health_insurance, routine_checkup, food_insecurity, housing_insecurity, urbanization_level.
 
 ## 4. Hypotheses
 
 ### Main Hypothesis (H₁)
 
-Counties with higher long-term exposure to fine particulate matter (PM2.5) have higher prevalence of diabetes and hypertension, even after controlling for obesity, smoking, and physical inactivity.
+Counties with higher long-term exposure to fine particulate matter (PM2.5) have a higher prevalence of diabetes and hypertension, even after controlling for obesity, smoking, and physical inactivity.
 
 ### Null Hypothesis (H₀)
 
 There is no statistically significant relationship between PM2.5 exposure and the prevalence of diabetes or hypertension.
 
+### Secondary Hypothesis (H₂)
+
+The association between PM2.5 and chronic disease prevalence is stronger in counties with higher social vulnerability, specifically those characterized by high food insecurity or a lack of health insurance.
+
+### Third Hypothesis (H₃)
+
+The strength of the association between PM2.5 and chronic disease varies significantly based on urbanization levels, with urban counties showing a stronger association due to higher pollution levels.
+
 ## 5. Expected Outcomes
+
+- A refined dataset that correctly reflects population-level exposure through weighted aggregation.
 
 - Identification of statistically significant correlations between PM2.5 concentration and the prevalence of chronic diseases (diabetes and hypertension).
 
@@ -71,4 +88,7 @@ There is no statistically significant relationship between PM2.5 exposure and th
 
 - Visualizations showing spatial patterns of pollution and disease burden across U.S. counties.
 
+- Interaction plots showing how social vulnerability (H₂) and urbanization (H₃) steepen the "slope" of the pollution-health relationship.
+
 - An interpretable regression or machine learning model demonstrating the predictive influence of environmental variables relative to behavioral ones.
+
