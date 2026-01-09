@@ -89,3 +89,7 @@ The strength of the association between PM2.5 and chronic disease varies signifi
 - Interaction plots showing how urbanization (H₃) steepen the "slope" of the pollution-health relationship.
 
 - An interpretable regression or machine learning model demonstrating the predictive influence of environmental variables relative to behavioral ones.
+
+## 6. Findings
+
+The findings can be found in the final report included in this repository, named `DSA210_FinalReport.pdf`.
