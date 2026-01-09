@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 
 def weighted_average(group, value_column, weight_column):
@@ -70,3 +71,26 @@ def build_dataset(csv_path="places_pm25_merged.csv", population_threshold=3000):
     grouped_df = grouped_df[(grouped_df[["diabetes", "hypertension", "avg_pm25"]] != 0).all(axis=1)]
 
     return grouped_df
+
+def ols_summary(model):
+    """
+    Generate a summary table for an OLS regression model including coefficients, standard errors, p-values, and confidence intervals.
+    Args:
+        model: A fitted statsmodels OLS regression model.
+    Returns:
+        pd.DataFrame: Summary table with R^2 values, MSE, coefficients, standard errors, p-values, and confidence intervals.
+    """
+    ci = model.conf_int()
+    coef_table = pd.concat([model.params, model.bse, model.pvalues, ci], axis=1)
+    coef_table.columns = ['coef','std_err','pvalue','ci_lower','ci_upper']
+    r_squared = model.rsquared
+    adj_r_squared = model.rsquared_adj
+    mse = model.mse_resid
+    summary_df = pd.DataFrame({
+        'R_squared': [r_squared],
+        'Adj_R_squared': [adj_r_squared],
+        'MSE': [mse],
+        'RMSE': [np.sqrt(mse)]
+    })
+    
+    return summary_df, coef_table

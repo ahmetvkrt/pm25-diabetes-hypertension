@@ -64,7 +64,7 @@ ctfips, avg_pm25, state_abbreviation, state_name, county_name, total_population,
 
 ### Main Hypothesis (H₁)
 
-Counties with higher long-term exposure to fine particulate matter (PM2.5) have a higher prevalence of diabetes and hypertension, even after controlling for obesity, smoking, and physical inactivity.
+Counties with higher long-term exposure to fine particulate matter (PM2.5) have a higher prevalence of diabetes and hypertension, even after controlling for key behavioral risk factors, and socioeconomic variables.
 
 ### Null Hypothesis (H₀)
 
@@ -72,7 +72,7 @@ There is no statistically significant relationship between PM2.5 exposure and th
 
 ### Secondary Hypothesis (H₂)
 
-The association between PM2.5 and chronic disease prevalence is stronger in counties with higher social vulnerability, specifically those characterized by high food insecurity or a lack of health insurance.
+Advanced machine learning algorithms, (such as Random Forest and Gradient Boosting), will significantly outperform traditional Linear Regression and K-Nearest Neighbors (KNN) in predicting county-level chronic disease prevalence, demonstrating that environmental and behavioral risks have complex, non-linear interactions.
 
 ### Third Hypothesis (H₃)
 
@@ -86,9 +86,6 @@ The strength of the association between PM2.5 and chronic disease varies signifi
 
 - Quantitative estimation of how much air pollution contributes to disease prevalence compared to behavioral factors.
 
-- Visualizations showing spatial patterns of pollution and disease burden across U.S. counties.
-
-- Interaction plots showing how social vulnerability (H₂) and urbanization (H₃) steepen the "slope" of the pollution-health relationship.
+- Interaction plots showing how urbanization (H₃) steepen the "slope" of the pollution-health relationship.
 
 - An interpretable regression or machine learning model demonstrating the predictive influence of environmental variables relative to behavioral ones.
-
